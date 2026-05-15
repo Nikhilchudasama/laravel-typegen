@@ -38,6 +38,7 @@ it('warns when no models are found', function () {
 
 it('generates types for an enum and a request together', function () {
     config()->set('typegen.paths.enums', __DIR__ . '/../Fixtures/Enums');
+    config()->set('typegen.paths.form_requests', __DIR__ . '/../Fixtures/Requests');
     config()->set('typegen.paths.models', __DIR__ . '/../Fixtures/Models');
     
     $outputPath = sys_get_temp_dir() . '/v02.ts';
@@ -49,6 +50,10 @@ it('generates types for an enum and a request together', function () {
 
     expect($contents)
         ->toContain("export type PostStatus = 'draft' | 'published';")
+        ->toContain('export interface StorePostRequest')
+        ->toContain('title: string;')
+        ->toContain('author: {')
+        ->toContain('name: string;')
         ->toContain('export interface User');
     
     @unlink($outputPath);

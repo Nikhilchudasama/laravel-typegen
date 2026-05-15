@@ -7,6 +7,8 @@ use Hemil09\TypeGen\Generators\EnumGenerator;
 use Hemil09\TypeGen\Generators\FormRequestGenerator;
 use Hemil09\TypeGen\Generators\ModelGenerator;
 use Hemil09\TypeGen\Mappers\CastTypeMapper;
+use Hemil09\TypeGen\Mappers\RuleToTypeMapper;
+use Hemil09\TypeGen\Mappers\RuleTree;
 use Hemil09\TypeGen\Scanners\ClassScanner;
 use Hemil09\TypeGen\Writers\TypeScriptWriter;
 
@@ -42,15 +44,15 @@ class GenerateCommand extends Command
         $requestPath = $config['paths']['form_requests'] ?? null;
         if ($requestPath && is_dir($requestPath)) {
             $requests = $scanner->scan([$requestPath], $config['scan_mode'] ?? 'attribute');
-            // FormRequestGenerator will be fully implemented in Day 3, 
-            // for now we'll just set up the loop.
-            if (class_exists(FormRequestGenerator::class)) {
-                $requestGenerator = app(FormRequestGenerator::class, ['config' => $config]);
+            $requestGenerator = new FormRequestGenerator(
+                new RuleToTypeMapper,
+                new RuleTree,
+                $config,
+            );
 
-                foreach ($requests as $request) {
-                    $this->line("  ✓ request {$request}");
-                    $blocks[] = $requestGenerator->generate($request);
-                }
+            foreach ($requests as $request) {
+                $this->line("  ✓ request {$request}");
+                $blocks[] = $requestGenerator->generate($request);
             }
         }
 
