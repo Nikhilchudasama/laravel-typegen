@@ -26,6 +26,7 @@ class CastTypeMapper
             if (enum_exists($base)) {
                 return (new \ReflectionClass($base))->getShortName();
             }
+
             return 'unknown';
         }
 
@@ -37,28 +38,28 @@ class CastTypeMapper
     {
         return [
             // primitives
-            'int'              => 'number',
-            'integer'          => 'number',
-            'real'             => 'number',
-            'float'            => 'number',
-            'double'           => 'number',
-            'decimal'          => 'number',
-            'string'           => 'string',
-            'bool'             => 'boolean',
-            'boolean'          => 'boolean',
-            'array'            => 'unknown[]',
-            'json'             => 'Record<string, unknown>',
-            'object'           => 'Record<string, unknown>',
-            'collection'       => 'unknown[]',
+            'int' => 'number',
+            'integer' => 'number',
+            'real' => 'number',
+            'float' => 'number',
+            'double' => 'number',
+            'decimal' => 'number',
+            'string' => 'string',
+            'bool' => 'boolean',
+            'boolean' => 'boolean',
+            'array' => 'unknown[]',
+            'json' => 'Record<string, unknown>',
+            'object' => 'Record<string, unknown>',
+            'collection' => 'unknown[]',
             // dates → string (ISO) by default; teams can override
-            'date'             => 'string',
-            'datetime'         => 'string',
-            'immutable_date'   => 'string',
-            'immutable_datetime'=> 'string',
-            'timestamp'        => 'string',
+            'date' => 'string',
+            'datetime' => 'string',
+            'immutable_date' => 'string',
+            'immutable_datetime' => 'string',
+            'timestamp' => 'string',
             // misc
-            'encrypted'        => 'string',
-            'hashed'           => 'string',
+            'encrypted' => 'string',
+            'hashed' => 'string',
         ];
     }
 }

@@ -23,30 +23,29 @@ class RuleToTypeMapper
             // Object rules (Enum, In, Rule::in(...), etc.)
             if (is_object($token)) {
                 $type ??= $this->describeObjectRule($token);
+
                 continue;
             }
 
-            if (! is_string($token)) continue;
+            if (! is_string($token)) {
+                continue;
+            }
 
             [$name, $arg] = $this->parseToken($token);
 
             match (true) {
-                $name === 'required'           => $required = true,
-                $name === 'nullable'           => $nullable = true,
-                $name === 'sometimes'          => $required = false,
-                $name === 'array'              => $isArray = true,
-                in_array($name, ['string', 'email', 'url', 'uuid', 'ulid', 'ip', 'ipv4', 'ipv6', 'json', 'alpha', 'alpha_num', 'alpha_dash'])
-                    => $type ??= 'string',
-                in_array($name, ['integer', 'numeric', 'decimal'])
-                    => $type ??= 'number',
-                $name === 'boolean'            => $type ??= 'boolean',
-                in_array($name, ['date', 'date_format', 'before', 'after'])
-                    => $type ??= 'string',
-                in_array($name, ['file', 'image', 'mimes'])
-                    => $type ??= 'File',
-                $name === 'in' && $arg         => $type ??= $this->inToUnion($arg),
-                $name === 'enum' && $arg       => $type ??= class_basename($arg),
-                default                        => null,
+                $name === 'required' => $required = true,
+                $name === 'nullable' => $nullable = true,
+                $name === 'sometimes' => $required = false,
+                $name === 'array' => $isArray = true,
+                in_array($name, ['string', 'email', 'url', 'uuid', 'ulid', 'ip', 'ipv4', 'ipv6', 'json', 'alpha', 'alpha_num', 'alpha_dash']) => $type ??= 'string',
+                in_array($name, ['integer', 'numeric', 'decimal']) => $type ??= 'number',
+                $name === 'boolean' => $type ??= 'boolean',
+                in_array($name, ['date', 'date_format', 'before', 'after']) => $type ??= 'string',
+                in_array($name, ['file', 'image', 'mimes']) => $type ??= 'File',
+                $name === 'in' && $arg => $type ??= $this->inToUnion($arg),
+                $name === 'enum' && $arg => $type ??= class_basename($arg),
+                default => null,
             };
         }
 
@@ -56,7 +55,7 @@ class RuleToTypeMapper
         }
 
         return [
-            'type'     => $type,
+            'type' => $type,
             'required' => $required && ! $nullable,
             'nullable' => $nullable,
         ];
@@ -67,6 +66,7 @@ class RuleToTypeMapper
         if (is_string($rules)) {
             return explode('|', $rules);
         }
+
         return $rules;
     }
 
@@ -76,15 +76,17 @@ class RuleToTypeMapper
             return [$token, null];
         }
         [$name, $arg] = explode(':', $token, 2);
+
         return [$name, $arg];
     }
 
     protected function inToUnion(string $arg): string
     {
         $values = array_map(
-            fn ($v) => is_numeric($v) ? $v : "'" . trim($v, "\"' ") . "'",
+            fn ($v) => is_numeric($v) ? $v : "'".trim($v, "\"' ")."'",
             explode(',', $arg),
         );
+
         return implode(' | ', $values);
     }
 
@@ -106,6 +108,7 @@ class RuleToTypeMapper
 
         if ($rule instanceof InRule) {
             $values = $rule->__toString(); // "in:a,b,c"
+
             return $this->inToUnion(substr($values, 3));
         }
 

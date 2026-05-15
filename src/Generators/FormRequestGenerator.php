@@ -2,11 +2,11 @@
 
 namespace Hemil09\TypeGen\Generators;
 
-use Illuminate\Foundation\Http\FormRequest;
-use ReflectionClass;
 use Hemil09\TypeGen\Attributes\TypeScript;
 use Hemil09\TypeGen\Mappers\RuleToTypeMapper;
 use Hemil09\TypeGen\Mappers\RuleTree;
+use Illuminate\Foundation\Http\FormRequest;
+use ReflectionClass;
 
 class FormRequestGenerator
 {
@@ -41,15 +41,18 @@ class FormRequestGenerator
     {
         $attr = $reflection->getAttributes(TypeScript::class)[0] ?? null;
         $override = $attr?->newInstance()->name;
+
         return $override ?? $reflection->getShortName();
     }
 
     protected function extractRules(string $requestClass): array
     {
         /** @var FormRequest $instance */
-        $instance = new $requestClass();
+        $instance = new $requestClass;
 
-        if (! method_exists($instance, 'rules')) return [];
+        if (! method_exists($instance, 'rules')) {
+            return [];
+        }
 
         return $instance->rules();
     }
@@ -66,6 +69,7 @@ class FormRequestGenerator
                 $optional = $desc['required'] ? '' : '?';
                 $type = $desc['nullable'] ? "{$desc['type']} | null" : $desc['type'];
                 $lines[] = "{$pad}{$key}{$optional}: {$type};";
+
                 continue;
             }
 
@@ -75,8 +79,11 @@ class FormRequestGenerator
                 $parentDesc = isset($node['__rules']) ? $this->mapper->map($node['__rules']) : ['required' => false, 'nullable' => false];
                 $optional = $parentDesc['required'] ? '' : '?';
                 $type = "{$itemDesc['type']}[]";
-                if ($parentDesc['nullable']) $type .= ' | null';
+                if ($parentDesc['nullable']) {
+                    $type .= ' | null';
+                }
                 $lines[] = "{$pad}{$key}{$optional}: {$type};";
+
                 continue;
             }
 
@@ -84,12 +91,13 @@ class FormRequestGenerator
             if (isset($node['__items'])) {
                 $inner = $this->renderTree($node['__items'], $indent + 2);
                 $lines[] = "{$pad}{$key}: {\n{$inner}\n{$pad}}[];";
+
                 continue;
             }
 
             // Nested object (author.name, author.age)
             $rulesAtThisLevel = $node['__rules'] ?? null;
-            $children = array_filter($node, fn($k) => ! str_starts_with($k, '__'), ARRAY_FILTER_USE_KEY);
+            $children = array_filter($node, fn ($k) => ! str_starts_with($k, '__'), ARRAY_FILTER_USE_KEY);
             $inner = $this->renderTree($children, $indent + 2);
 
             $optional = '';

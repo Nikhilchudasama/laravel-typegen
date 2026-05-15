@@ -2,9 +2,9 @@
 
 namespace Hemil09\TypeGen\Scanners;
 
+use Hemil09\TypeGen\Attributes\TypeScript;
 use ReflectionClass;
 use Symfony\Component\Finder\Finder;
-use Hemil09\TypeGen\Attributes\TypeScript;
 
 class ClassScanner
 {
@@ -17,17 +17,23 @@ class ClassScanner
         $found = [];
 
         foreach ($paths as $path) {
-            if (! is_dir($path)) continue;
+            if (! is_dir($path)) {
+                continue;
+            }
 
             foreach ((new Finder)->files()->in($path)->name('*.php') as $file) {
                 $fqcn = $this->classFromFile($file->getRealPath());
-                if (! $fqcn) continue;
+                if (! $fqcn) {
+                    continue;
+                }
 
                 $exists = match ($filter) {
-                    'enum'  => enum_exists($fqcn),
+                    'enum' => enum_exists($fqcn),
                     default => class_exists($fqcn),
                 };
-                if (! $exists) continue;
+                if (! $exists) {
+                    continue;
+                }
 
                 if ($mode === 'all' || $this->hasAttribute($fqcn)) {
                     $found[] = $fqcn;
@@ -47,8 +53,13 @@ class ClassScanner
     private function classFromFile(string $path): ?string
     {
         $contents = file_get_contents($path);
-        if (! preg_match('/namespace\s+([^;]+);/', $contents, $ns)) return null;
-        if (! preg_match('/(?:class|enum)\s+(\w+)/', $contents, $cls)) return null;
-        return trim($ns[1]) . '\\' . $cls[1];
+        if (! preg_match('/namespace\s+([^;]+);/', $contents, $ns)) {
+            return null;
+        }
+        if (! preg_match('/(?:class|enum)\s+(\w+)/', $contents, $cls)) {
+            return null;
+        }
+
+        return trim($ns[1]).'\\'.$cls[1];
     }
 }

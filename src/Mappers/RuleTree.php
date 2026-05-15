@@ -6,7 +6,7 @@ class RuleTree
 {
     /**
      * @param  array<string,mixed>  $rules
-     * @return array  nested tree
+     * @return array nested tree
      */
     public function build(array $rules): array
     {
@@ -27,6 +27,7 @@ class RuleTree
         if (empty($parts)) {
             // Leaf
             $tree[$head]['__rules'] = $rule;
+
             return;
         }
 
@@ -39,11 +40,13 @@ class RuleTree
             if (empty($parts)) {
                 // tags.* → item rules for the array
                 $tree[$head]['__item_rules'] = $rule;
+
                 return;
             }
             // tags.*.name → array of objects
             $tree[$head]['__items'] ??= [];
             $this->insert($tree[$head]['__items'], $parts, $rule);
+
             return;
         }
 

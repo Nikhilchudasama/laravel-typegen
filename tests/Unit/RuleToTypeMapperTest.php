@@ -1,6 +1,7 @@
 <?php
 
 use Hemil09\TypeGen\Mappers\RuleToTypeMapper;
+use Illuminate\Validation\Rules\In;
 
 beforeEach(fn () => $this->mapper = new RuleToTypeMapper);
 
@@ -30,7 +31,7 @@ it('handles pipe-string rules', function () {
 });
 
 it('handles array of rules with objects', function () {
-    $rule = new \Illuminate\Validation\Rules\In(['a', 'b']);
+    $rule = new In(['a', 'b']);
     expect($this->mapper->map(['required', $rule]))
         ->toMatchArray(['type' => "'a' | 'b'", 'required' => true]);
 });

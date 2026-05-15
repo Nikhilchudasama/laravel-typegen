@@ -2,8 +2,8 @@
 
 namespace Hemil09\TypeGen\Generators;
 
-use ReflectionEnum;
 use Hemil09\TypeGen\Attributes\TypeScript;
+use ReflectionEnum;
 
 class EnumGenerator
 {
@@ -20,6 +20,7 @@ class EnumGenerator
         }
 
         $union = implode(' | ', $values);
+
         return "export type {$name} = {$union};";
     }
 
@@ -27,6 +28,7 @@ class EnumGenerator
     {
         $attr = $reflection->getAttributes(TypeScript::class)[0] ?? null;
         $override = $attr?->newInstance()->name;
+
         return $override ?? $reflection->getShortName();
     }
 
@@ -36,15 +38,15 @@ class EnumGenerator
         $values = [];
 
         foreach ($reflection->getCases() as $case) {
-            if ($reflection->isBacked()) {
+            if ($case instanceof \ReflectionEnumBackedCase) {
                 $backingType = $reflection->getBackingType()?->getName();
                 $value = $case->getBackingValue();
                 $values[] = $backingType === 'string'
-                    ? "'" . str_replace("'", "\\'", (string) $value) . "'"
+                    ? "'".str_replace("'", "\\'", (string) $value)."'"
                     : (string) $value;
             } else {
                 // pure enum — emit case names as string literals
-                $values[] = "'" . $case->getName() . "'";
+                $values[] = "'".$case->getName()."'";
             }
         }
 

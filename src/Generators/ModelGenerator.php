@@ -2,11 +2,10 @@
 
 namespace Hemil09\TypeGen\Generators;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Str;
-use ReflectionClass;
 use Hemil09\TypeGen\Attributes\TypeScript;
 use Hemil09\TypeGen\Mappers\CastTypeMapper;
+use Illuminate\Database\Eloquent\Model;
+use ReflectionClass;
 
 class ModelGenerator
 {
@@ -39,12 +38,15 @@ class ModelGenerator
     {
         $attr = $reflection->getAttributes(TypeScript::class)[0] ?? null;
         $override = $attr?->newInstance()->name;
-        if ($override) return $override;
+        if ($override) {
+            return $override;
+        }
 
         $base = $reflection->getShortName();
+
         return ($this->config['naming']['model_prefix'] ?? '')
-            . $base
-            . ($this->config['naming']['model_suffix'] ?? '');
+            .$base
+            .($this->config['naming']['model_suffix'] ?? '');
     }
 
     /** @return array<string,string> */
@@ -65,8 +67,12 @@ class ModelGenerator
 
         // fillable (columns not in casts → assume string)
         foreach ($instance->getFillable() as $attr) {
-            if (isset($fields[$attr])) continue;
-            if (! $this->config['include_hidden'] && in_array($attr, $instance->getHidden(), true)) continue;
+            if (isset($fields[$attr])) {
+                continue;
+            }
+            if (! $this->config['include_hidden'] && in_array($attr, $instance->getHidden(), true)) {
+                continue;
+            }
             $fields[$attr] = 'string';
         }
 

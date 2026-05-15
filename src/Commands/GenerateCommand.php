@@ -2,7 +2,6 @@
 
 namespace Hemil09\TypeGen\Commands;
 
-use Illuminate\Console\Command;
 use Hemil09\TypeGen\Generators\EnumGenerator;
 use Hemil09\TypeGen\Generators\FormRequestGenerator;
 use Hemil09\TypeGen\Generators\ModelGenerator;
@@ -11,6 +10,7 @@ use Hemil09\TypeGen\Mappers\RuleToTypeMapper;
 use Hemil09\TypeGen\Mappers\RuleTree;
 use Hemil09\TypeGen\Scanners\ClassScanner;
 use Hemil09\TypeGen\Writers\TypeScriptWriter;
+use Illuminate\Console\Command;
 
 class GenerateCommand extends Command
 {
@@ -62,8 +62,8 @@ class GenerateCommand extends Command
             $config['scan_mode'] ?? 'attribute',
         );
 
-        if (!empty($models)) {
-            $this->info("Generating types for " . count($models) . " models...");
+        if (! empty($models)) {
+            $this->info('Generating types for '.count($models).' models...');
             foreach ($models as $model) {
                 $this->line("  ✓ model {$model}");
                 $blocks[] = $generator->generate($model);
@@ -72,16 +72,19 @@ class GenerateCommand extends Command
 
         if (empty($blocks)) {
             $this->warn('No classes found. Did you add the #[TypeScript] attribute?');
+
             return self::SUCCESS;
         }
 
         if ($this->option('dry-run')) {
-            $this->line("\n" . implode("\n\n", $blocks));
+            $this->line("\n".implode("\n\n", $blocks));
+
             return self::SUCCESS;
         }
 
         $path = $writer->write($blocks);
         $this->info("\nWritten to: {$path}");
+
         return self::SUCCESS;
     }
 }

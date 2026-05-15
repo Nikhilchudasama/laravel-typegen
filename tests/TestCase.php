@@ -2,8 +2,8 @@
 
 namespace Hemil09\TypeGen\Tests;
 
-use Orchestra\Testbench\TestCase as Orchestra;
 use Hemil09\TypeGen\TypeGenServiceProvider;
+use Orchestra\Testbench\TestCase as Orchestra;
 
 class TestCase extends Orchestra
 {
@@ -15,6 +15,6 @@ class TestCase extends Orchestra
     protected function defineEnvironment($app)
     {
         // Setup default config for tests
-        $app['config']->set('typegen', include __DIR__ . '/../config/typegen.php');
+        $app['config']->set('typegen', include __DIR__.'/../config/typegen.php');
     }
 }
