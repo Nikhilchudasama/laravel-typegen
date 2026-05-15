@@ -14,5 +14,6 @@ class User extends Model
         'email_verified_at' => 'datetime',
         'is_admin' => 'boolean',
         'preferences' => 'array',
+        'status' => \Hemil09\TypeGen\Tests\Fixtures\Enums\PostStatus::class,
     ];
 }

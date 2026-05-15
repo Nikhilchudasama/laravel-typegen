@@ -16,7 +16,20 @@ class CastTypeMapper
     {
         // strip parameter portion: "decimal:2" -> "decimal"
         $base = explode(':', $cast)[0];
-        return $this->map[$base] ?? 'unknown';
+
+        if (isset($this->map[$base])) {
+            return $this->map[$base];
+        }
+
+        // class-string cast (enum or custom Cast class)
+        if (class_exists($base) || enum_exists($base)) {
+            if (enum_exists($base)) {
+                return (new \ReflectionClass($base))->getShortName();
+            }
+            return 'unknown';
+        }
+
+        return 'unknown';
     }
 
     /** @return array<string,string> */

@@ -33,5 +33,23 @@ it('warns when no models are found', function () {
     
     $this->artisan('typescript:generate')
         ->assertSuccessful()
-        ->expectsOutputToContain('No models found');
+        ->expectsOutputToContain('No classes found');
+});
+
+it('generates types for an enum and a request together', function () {
+    config()->set('typegen.paths.enums', __DIR__ . '/../Fixtures/Enums');
+    config()->set('typegen.paths.models', __DIR__ . '/../Fixtures/Models');
+    
+    $outputPath = sys_get_temp_dir() . '/v02.ts';
+    config()->set('typegen.output.path', $outputPath);
+
+    $this->artisan('typescript:generate')->assertSuccessful();
+
+    $contents = file_get_contents($outputPath);
+
+    expect($contents)
+        ->toContain("export type PostStatus = 'draft' | 'published';")
+        ->toContain('export interface User');
+    
+    @unlink($outputPath);
 });

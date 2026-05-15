@@ -12,24 +12,30 @@ class ClassScanner
      * @param  array<string>  $paths
      * @return array<class-string>
      */
-    public function scan(array $paths, string $mode = 'attribute'): array
+    public function scan(array $paths, string $mode = 'attribute', string $filter = 'class'): array
     {
-        $classes = [];
+        $found = [];
 
         foreach ($paths as $path) {
             if (! is_dir($path)) continue;
 
             foreach ((new Finder)->files()->in($path)->name('*.php') as $file) {
                 $fqcn = $this->classFromFile($file->getRealPath());
-                if (! $fqcn || ! class_exists($fqcn)) continue;
+                if (! $fqcn) continue;
+
+                $exists = match ($filter) {
+                    'enum'  => enum_exists($fqcn),
+                    default => class_exists($fqcn),
+                };
+                if (! $exists) continue;
 
                 if ($mode === 'all' || $this->hasAttribute($fqcn)) {
-                    $classes[] = $fqcn;
+                    $found[] = $fqcn;
                 }
             }
         }
 
-        return $classes;
+        return $found;
     }
 
     private function hasAttribute(string $fqcn): bool
@@ -42,7 +48,7 @@ class ClassScanner
     {
         $contents = file_get_contents($path);
         if (! preg_match('/namespace\s+([^;]+);/', $contents, $ns)) return null;
-        if (! preg_match('/class\s+(\w+)/', $contents, $cls)) return null;
+        if (! preg_match('/(?:class|enum)\s+(\w+)/', $contents, $cls)) return null;
         return trim($ns[1]) . '\\' . $cls[1];
     }
 }
