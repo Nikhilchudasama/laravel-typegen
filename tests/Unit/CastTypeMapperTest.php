@@ -29,3 +29,11 @@ it('falls back to unknown for unconfigured custom classes', function () {
     $mapper = new CastTypeMapper;
     expect($mapper->toTypeScript('NonExistentCustomCast'))->toBe('unknown');
 });
+
+it('supports programmatic custom cast registration', function () {
+    $mapper = new CastTypeMapper;
+    $mapper->register('App\Casts\UUIDCast', 'string');
+
+    expect($mapper->toTypeScript('App\Casts\UUIDCast'))->toBe('string')
+        ->and($mapper->toTypeScript('\App\Casts\UUIDCast'))->toBe('string');
+});

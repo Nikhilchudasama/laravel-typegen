@@ -149,3 +149,29 @@ it('splits output into separate files with imports when split config is enabled'
     }
     @rmdir($dir);
 });
+
+it('respects ignore attributes and parameters', function () {
+    $outputPath = sys_get_temp_dir().'/ignore.ts';
+
+    config()->set('typegen.paths.models', __DIR__.'/../Fixtures/Models');
+    config()->set('typegen.output.path', $outputPath);
+
+    $this->artisan('typescript:generate')->assertSuccessful();
+
+    $contents = file_get_contents($outputPath);
+
+    // Extract the IgnoredUser block to assert on it in isolation
+    $start = strpos($contents, 'export interface IgnoredUser {');
+    $end = strpos($contents, '}', $start) + 1;
+    $ignoredUserBlock = substr($contents, $start, $end - $start);
+
+    expect($ignoredUserBlock)->toContain('export interface IgnoredUser')
+        ->and($ignoredUserBlock)->toContain('name: string;')
+        ->and($ignoredUserBlock)->toContain('updated_at: string;')
+        ->and($ignoredUserBlock)->not->toContain('email:')
+        ->and($ignoredUserBlock)->not->toContain('posts?')
+        ->and($ignoredUserBlock)->not->toContain('profile?')
+        ->and($ignoredUserBlock)->not->toContain('created_at:');
+
+    @unlink($outputPath);
+});

@@ -69,4 +69,11 @@ class CastTypeMapper
             'hashed' => 'string',
         ];
     }
+
+    public function register(string $cast, string $type): self
+    {
+        $this->map[ltrim($cast, '\\')] = $type;
+
+        return $this;
+    }
 }

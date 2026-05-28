@@ -12,5 +12,7 @@ final class TypeScript
         public bool $export = true,
         /** @var array<string> */
         public array $includeRelations = [],
+        /** @var array<string> */
+        public array $ignore = [],
     ) {}
 }

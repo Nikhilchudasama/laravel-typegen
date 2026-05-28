@@ -3,6 +3,7 @@
 namespace hemilrajput\TypeGen\Generators;
 
 use hemilrajput\TypeGen\Attributes\TypeScript;
+use hemilrajput\TypeGen\Attributes\TypeScriptIgnore;
 use hemilrajput\TypeGen\Mappers\CastTypeMapper;
 use hemilrajput\TypeGen\Relations\RelationResolver;
 use Illuminate\Database\Eloquent\Model;
@@ -22,9 +23,12 @@ class ModelGenerator
         $instance = new $modelClass;
         $reflection = new ReflectionClass($modelClass);
 
+        $attr = $reflection->getAttributes(TypeScript::class)[0] ?? null;
+        $ignore = $attr ? $attr->newInstance()->ignore : [];
+
         $name = $this->resolveName($reflection);
-        $fields = $this->collectFields($instance);
-        $relationResult = $this->collectRelations($reflection, $modelClass);
+        $fields = $this->collectFields($instance, $ignore);
+        $relationResult = $this->collectRelations($reflection, $modelClass, $ignore);
 
         $allLines = [];
         foreach ($fields as $field => $type) {
@@ -64,15 +68,21 @@ class ModelGenerator
     }
 
     /** @return array<string,string> */
-    protected function collectFields(Model $instance): array
+    protected function collectFields(Model $instance, array $ignore = []): array
     {
         $fields = [];
 
         // primary key
-        $fields[$instance->getKeyName()] = $instance->getKeyType() === 'int' ? 'number' : 'string';
+        $keyName = $instance->getKeyName();
+        if (! in_array($keyName, $ignore, true)) {
+            $fields[$keyName] = $instance->getKeyType() === 'int' ? 'number' : 'string';
+        }
 
         // casts
         foreach ($instance->getCasts() as $attr => $cast) {
+            if (in_array($attr, $ignore, true)) {
+                continue;
+            }
             if (! $this->config['include_hidden'] && in_array($attr, $instance->getHidden(), true)) {
                 continue;
             }
@@ -81,7 +91,7 @@ class ModelGenerator
 
         // fillable (columns not in casts → assume string)
         foreach ($instance->getFillable() as $attr) {
-            if (isset($fields[$attr])) {
+            if (isset($fields[$attr]) || in_array($attr, $ignore, true)) {
                 continue;
             }
             if (! $this->config['include_hidden'] && in_array($attr, $instance->getHidden(), true)) {
@@ -92,8 +102,15 @@ class ModelGenerator
 
         // timestamps
         if ($this->config['include_timestamps'] && $instance->usesTimestamps()) {
-            $fields[$instance->getCreatedAtColumn() ?? 'created_at'] = 'string';
-            $fields[$instance->getUpdatedAtColumn() ?? 'updated_at'] = 'string';
+            $createdAt = $instance->getCreatedAtColumn() ?? 'created_at';
+            $updatedAt = $instance->getUpdatedAtColumn() ?? 'updated_at';
+
+            if (! in_array($createdAt, $ignore, true)) {
+                $fields[$createdAt] = 'string';
+            }
+            if (! in_array($updatedAt, $ignore, true)) {
+                $fields[$updatedAt] = 'string';
+            }
         }
 
         return $fields;
@@ -102,7 +119,7 @@ class ModelGenerator
     /**
      * @return array{fields: array<string,string>, discovered: array<string>}
      */
-    protected function collectRelations(ReflectionClass $reflection, string $modelClass): array
+    protected function collectRelations(ReflectionClass $reflection, string $modelClass, array $ignore = []): array
     {
         $attr = $reflection->getAttributes(TypeScript::class)[0] ?? null;
         $relations = $attr?->newInstance()->includeRelations ?? [];
@@ -111,6 +128,17 @@ class ModelGenerator
         $discovered = [];
 
         foreach ($relations as $methodName) {
+            if (in_array($methodName, $ignore, true)) {
+                continue;
+            }
+
+            if ($reflection->hasMethod($methodName)) {
+                $method = $reflection->getMethod($methodName);
+                if ($method->getAttributes(TypeScriptIgnore::class)) {
+                    continue;
+                }
+            }
+
             $resolved = $this->resolver->resolve($modelClass, $methodName);
 
             if ($resolved['error']) {

@@ -23,10 +23,9 @@ class GenerateCommand extends Command
 
     protected $description = 'Generate TypeScript types from Laravel models, enums, and form requests.';
 
-    public function handle(ClassScanner $scanner): int
+    public function handle(ClassScanner $scanner, CastTypeMapper $mapper): int
     {
         $config = config('typegen');
-        $mapper = new CastTypeMapper($config['cast_map'] ?? []);
 
         $writer = isset($config['output']['split']) && $config['output']['split']
             ? new TypeScriptSplitWriter($config)
@@ -75,44 +74,76 @@ class GenerateCommand extends Command
     protected function runGeneration(ClassScanner $scanner, array $config, CastTypeMapper $mapper, $writer): int
     {
         $blocks = [];
+        $isVerbose = $this->option('watch') || $this->option('dry-run');
 
-        // 1. Enums
+        $enums = [];
+        $requests = [];
+        $models = [];
+
+        // 1. Scan Enums
         $enumPath = $config['paths']['enums'] ?? null;
         if ($enumPath && is_dir($enumPath)) {
             $enums = $scanner->scan([$enumPath], $config['scan_mode'] ?? 'attribute', filter: 'enum');
-            $enumGenerator = new EnumGenerator($config);
-
-            foreach ($enums as $enum) {
-                $this->line("  ✓ enum {$enum}");
-                $blocks[] = $enumGenerator->generate($enum);
-            }
         }
 
-        // 2. Form Requests
+        // 2. Scan Form Requests
         $requestPath = $config['paths']['form_requests'] ?? null;
         if ($requestPath && is_dir($requestPath)) {
             $requests = $scanner->scan([$requestPath], $config['scan_mode'] ?? 'attribute');
+        }
+
+        // 3. Scan Models
+        $modelPath = $config['paths']['models'] ?? app_path('Models');
+        if (is_dir($modelPath)) {
+            $models = $scanner->scan([$modelPath], $config['scan_mode'] ?? 'attribute');
+        }
+
+        $totalCount = count($enums) + count($requests) + count($models);
+        $bar = null;
+
+        if (! $isVerbose && $totalCount > 0) {
+            $bar = $this->output->createProgressBar($totalCount);
+            $bar->start();
+        }
+
+        // Process Enums
+        if (! empty($enums)) {
+            $enumGenerator = new EnumGenerator($config);
+            foreach ($enums as $enum) {
+                if ($isVerbose) {
+                    $this->line("  ✓ enum {$enum}");
+                }
+                $blocks[] = $enumGenerator->generate($enum);
+                if ($bar) {
+                    $bar->advance();
+                }
+            }
+        }
+
+        // Process Form Requests
+        if (! empty($requests)) {
             $requestGenerator = new FormRequestGenerator(
                 new RuleToTypeMapper,
                 new RuleTree,
                 $config,
             );
-
             foreach ($requests as $request) {
-                $this->line("  ✓ request {$request}");
+                if ($isVerbose) {
+                    $this->line("  ✓ request {$request}");
+                }
                 $blocks[] = $requestGenerator->generate($request);
+                if ($bar) {
+                    $bar->advance();
+                }
             }
         }
 
-        // 3. Models
-        $modelPath = $config['paths']['models'] ?? app_path('Models');
+        // Process Models
         $modelBlocks = [];
         if (is_dir($modelPath)) {
             $detector = new RelationDetector;
             $resolver = new RelationResolver($detector);
             $modelGenerator = new ModelGenerator($mapper, $resolver, $config);
-
-            $models = $scanner->scan([$modelPath], $config['scan_mode'] ?? 'attribute');
 
             // BFS queue with cycle detection
             $queue = array_values($models);
@@ -120,7 +151,9 @@ class GenerateCommand extends Command
 
             while (! empty($queue)) {
                 $modelClass = array_shift($queue);
-                $this->line("  ✓ model {$modelClass}");
+                if ($isVerbose) {
+                    $this->line("  ✓ model {$modelClass}");
+                }
 
                 $result = $modelGenerator->generate($modelClass);
                 $modelBlocks[] = $result['block'];
@@ -130,10 +163,23 @@ class GenerateCommand extends Command
                     if (! isset($seen[$discoveredClass]) && class_exists($discoveredClass)) {
                         $seen[$discoveredClass] = true;
                         $queue[] = $discoveredClass;
-                        $this->line("    ↳ discovered {$discoveredClass}");
+                        if ($isVerbose) {
+                            $this->line("    ↳ discovered {$discoveredClass}");
+                        } elseif ($bar) {
+                            $bar->setMaxSteps($bar->getMaxSteps() + 1);
+                        }
                     }
                 }
+
+                if ($bar) {
+                    $bar->advance();
+                }
             }
+        }
+
+        if ($bar) {
+            $bar->finish();
+            $this->line(''); // empty line after progress bar finish
         }
 
         // Assemble: enums -> form requests -> models
