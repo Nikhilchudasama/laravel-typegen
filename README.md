@@ -135,7 +135,7 @@ Without a morph map, emits `unknown | null` with a comment.
 - [x] Watch mode (v0.4)
 - [x] Custom Cast class resolver (v0.4)
 - [x] VitePress documentation site (v1.0.0)
-- [ ] Stable release (v1.0.0)
+- [x] Stable release (v1.0.0)
 
 ## Configuration
 
