@@ -5,6 +5,7 @@ namespace hemilrajput\TypeGen\Commands;
 use hemilrajput\TypeGen\Generators\EnumGenerator;
 use hemilrajput\TypeGen\Generators\FormRequestGenerator;
 use hemilrajput\TypeGen\Generators\ModelGenerator;
+use hemilrajput\TypeGen\Generators\ResourceGenerator;
 use hemilrajput\TypeGen\Mappers\CastTypeMapper;
 use hemilrajput\TypeGen\Mappers\RuleToTypeMapper;
 use hemilrajput\TypeGen\Mappers\RuleTree;
@@ -14,6 +15,7 @@ use hemilrajput\TypeGen\Scanners\ClassScanner;
 use hemilrajput\TypeGen\Writers\TypeScriptSplitWriter;
 use hemilrajput\TypeGen\Writers\TypeScriptWriter;
 use Illuminate\Console\Command;
+use Symfony\Component\Process\Process;
 
 class GenerateCommand extends Command
 {
@@ -76,8 +78,21 @@ class GenerateCommand extends Command
         $blocks = [];
         $isVerbose = $this->option('watch') || $this->option('dry-run');
 
+        $outputPath = $config['output']['path'] ?? resource_path('js/types/generated.ts');
+        if (isset($config['output']['split']) && $config['output']['split']) {
+            $outputPath = dirname($outputPath).'/'.pathinfo($outputPath, PATHINFO_FILENAME);
+        }
+
+        if (! $this->option('dry-run')) {
+            $preHooks = $config['hooks']['pre_generate'] ?? [];
+            if (! empty($preHooks)) {
+                $this->runHooks($preHooks, $outputPath);
+            }
+        }
+
         $enums = [];
         $requests = [];
+        $resources = [];
         $models = [];
 
         // 1. Scan Enums
@@ -92,13 +107,19 @@ class GenerateCommand extends Command
             $requests = $scanner->scan([$requestPath], $config['scan_mode'] ?? 'attribute');
         }
 
+        // 2.5 Scan API Resources
+        $resourcePath = $config['paths']['resources'] ?? null;
+        if ($resourcePath && is_dir($resourcePath)) {
+            $resources = $scanner->scan([$resourcePath], $config['scan_mode'] ?? 'attribute');
+        }
+
         // 3. Scan Models
         $modelPath = $config['paths']['models'] ?? app_path('Models');
         if (is_dir($modelPath)) {
             $models = $scanner->scan([$modelPath], $config['scan_mode'] ?? 'attribute');
         }
 
-        $totalCount = count($enums) + count($requests) + count($models);
+        $totalCount = count($enums) + count($requests) + count($resources) + count($models);
         $bar = null;
 
         if (! $isVerbose && $totalCount > 0) {
@@ -132,6 +153,20 @@ class GenerateCommand extends Command
                     $this->line("  ✓ request {$request}");
                 }
                 $blocks[] = $requestGenerator->generate($request);
+                if ($bar) {
+                    $bar->advance();
+                }
+            }
+        }
+
+        // Process API Resources
+        if (! empty($resources)) {
+            $resourceGenerator = new ResourceGenerator($mapper, $config);
+            foreach ($resources as $resource) {
+                if ($isVerbose) {
+                    $this->line("  ✓ resource {$resource}");
+                }
+                $blocks[] = $resourceGenerator->generate($resource);
                 if ($bar) {
                     $bar->advance();
                 }
@@ -204,7 +239,35 @@ class GenerateCommand extends Command
         $path = $writer->write($allBlocks);
         $this->info("\nWritten to: {$path}");
 
+        if (! $this->option('dry-run')) {
+            $postHooks = $config['hooks']['post_generate'] ?? [];
+            if (! empty($postHooks)) {
+                $this->runHooks($postHooks, $path);
+            }
+        }
+
         return self::SUCCESS;
+    }
+
+    protected function runHooks(array $commands, string $filePath): void
+    {
+        foreach ($commands as $command) {
+            $cmd = str_replace('{file}', $filePath, $command);
+
+            try {
+                if (class_exists(Process::class)) {
+                    $process = Process::fromShellCommandline($cmd);
+                    $process->run();
+                    if (! $process->isSuccessful()) {
+                        $this->warn("Hook failed: {$cmd}\nError: ".$process->getErrorOutput());
+                    }
+                } else {
+                    shell_exec($cmd);
+                }
+            } catch (\Throwable $e) {
+                $this->warn("Hook failed to execute: {$cmd}\nException: ".$e->getMessage());
+            }
+        }
     }
 
     protected function getWatchFiles(array $config): array

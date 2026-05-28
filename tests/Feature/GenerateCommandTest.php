@@ -245,3 +245,59 @@ it('respects relations wrap configuration', function () {
 
     @unlink($outputPath);
 });
+
+it('runs pre and post generation hooks and replaces the placeholder', function () {
+    $outputPath = sys_get_temp_dir().'/hooks_test.ts';
+    $preFile = sys_get_temp_dir().'/pre_hook_ran.txt';
+    $postFile = sys_get_temp_dir().'/post_hook_ran.txt';
+
+    @unlink($preFile);
+    @unlink($postFile);
+
+    config()->set('typegen.paths.models', __DIR__.'/../Fixtures/Models');
+    config()->set('typegen.output.path', $outputPath);
+    config()->set('typegen.hooks.pre_generate', [
+        'echo pre > '.$preFile,
+    ]);
+    config()->set('typegen.hooks.post_generate', [
+        'echo post > '.$postFile,
+    ]);
+
+    $this->artisan('typescript:generate')->assertSuccessful();
+
+    expect(file_exists($preFile))->toBeTrue()
+        ->and(file_exists($postFile))->toBeTrue();
+
+    @unlink($outputPath);
+    @unlink($preFile);
+    @unlink($postFile);
+});
+
+it('generates TypeScript types for API Resources from PHPDoc and Model fallback', function () {
+    $outputPath = sys_get_temp_dir().'/resources_test.ts';
+
+    config()->set('typegen.paths.resources', __DIR__.'/../Fixtures/Resources');
+    config()->set('typegen.output.path', $outputPath);
+
+    $this->artisan('typescript:generate')->assertSuccessful();
+
+    $contents = file_get_contents($outputPath);
+
+    // CustomResource assertions
+    expect($contents)->toContain('export interface CustomResource')
+        ->and($contents)->toContain('id: number;')
+        ->and($contents)->toContain('title: string;')
+        ->and($contents)->toContain('description: string | null;')
+        ->and($contents)->toContain('is_published: boolean;')
+        ->and($contents)->toContain('metadata: any;');
+
+    // UserResource assertions (model fallback)
+    expect($contents)->toContain('export interface UserResource')
+        ->and($contents)->toContain('id: number;')
+        ->and($contents)->toContain('email_verified_at: string;')
+        ->and($contents)->toContain('is_admin: boolean;')
+        ->and($contents)->toContain('preferences: unknown[];')
+        ->and($contents)->toContain('status: PostStatus;');
+
+    @unlink($outputPath);
+});

@@ -14,6 +14,7 @@ return [
         'models' => app_path('Models'),
         'enums' => app_path('Enums'),         // v0.2
         'form_requests' => app_path('Http/Requests'), // v0.2
+        'resources' => app_path('Http/Resources'),
     ],
 
     /*
@@ -76,5 +77,22 @@ return [
     */
     'relations' => [
         'wrap_with_relation' => true,
+    ],
+
+    /*
+    |---------------------------------------------------------------------
+    | Generation Hooks
+    |---------------------------------------------------------------------
+    | Commands to run before or after generating types. The `{file}`
+    | placeholder will be replaced with the output path or directory.
+    |
+    */
+    'hooks' => [
+        'pre_generate' => [
+            //
+        ],
+        'post_generate' => [
+            //
+        ],
     ],
 ];
