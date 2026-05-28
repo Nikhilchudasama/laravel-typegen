@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2026-05-28
+
+### Added
+- **Database Schema Fallbacks**: Automated column type and nullability inference via database schema inspection (`Schema::getColumns()`), falling back gracefully to fillables.
+- **Eager-Loading TS Helpers**: Custom relationship wrapping using `Relation<T>` to help distinguish between unloaded, loaded, and null states in the frontend. Can be configured/disabled via `relations.wrap_with_relation`.
+
+## [1.1.0] - 2026-05-28
+
+### Added
+- **Ignore Customization**: Supported excluding attributes and relations using `#[TypeScriptIgnore]` and the `ignore` array option on `#[TypeScript]`.
+- **Pluggable Type Mappers**: Container-bound singleton registry on `CastTypeMapper` to programmatically register custom type mappers at runtime.
+- **CLI Progress Bars**: Interactive terminal progress bar support for a cleaner generate command CLI experience.
+
+## [1.0.0] - 2026-05-28
+
+### Added
+- **VitePress Documentation Site**: Built a fully-featured VitePress documentation site with comprehensive setup guides, Spatie migration comparison, and Inertia integrations.
+
 ## [0.4.0] - 2026-05-28
 
 ### Added
