@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2026-05-31
+
+### Added
+- **Pre/Post Generation Hooks**: Added support for running shell commands before or after type generation (e.g. running Prettier or linters), replacing the `{file}` placeholder with the output file/directory.
+- **JsonResource Transformer**: Added type generation for Laravel API `JsonResource` responses using class-level PHPDoc `@property` definitions, with automatic fallback mapping to Eloquent model schemas.
+
 ## [1.2.0] - 2026-05-28
 
 ### Added
@@ -55,6 +61,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `#[TypeScript]` attribute for opting into generation.
 - Artisan `typescript:generate` command.
 
+[1.3.0]: https://github.com/hemilrajput/laravel-typegen/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/hemilrajput/laravel-typegen/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/hemilrajput/laravel-typegen/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/hemilrajput/laravel-typegen/compare/v0.4.0...v1.0.0
