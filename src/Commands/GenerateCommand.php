@@ -11,13 +11,15 @@ use hemilrajput\TypeGen\Mappers\RuleTree;
 use hemilrajput\TypeGen\Relations\RelationDetector;
 use hemilrajput\TypeGen\Relations\RelationResolver;
 use hemilrajput\TypeGen\Scanners\ClassScanner;
+use hemilrajput\TypeGen\Writers\TypeScriptSplitWriter;
 use hemilrajput\TypeGen\Writers\TypeScriptWriter;
 use Illuminate\Console\Command;
 
 class GenerateCommand extends Command
 {
     protected $signature = 'typescript:generate
-                            {--dry-run : Print output instead of writing}';
+                            {--dry-run : Print output instead of writing}
+                            {--watch : Keep running and watch for file changes}';
 
     protected $description = 'Generate TypeScript types from Laravel models, enums, and form requests.';
 
@@ -25,7 +27,47 @@ class GenerateCommand extends Command
     {
         $config = config('typegen');
         $mapper = new CastTypeMapper($config['cast_map'] ?? []);
-        $writer = new TypeScriptWriter($config);
+
+        $writer = isset($config['output']['split']) && $config['output']['split']
+            ? new TypeScriptSplitWriter($config)
+            : new TypeScriptWriter($config);
+
+        if ($this->option('watch')) {
+            $this->info('Watching for changes in models, enums, and form requests...');
+            $lastRun = 0;
+
+            while (app()->runningInConsole()) {
+                $files = $this->getWatchFiles($config);
+                $changed = false;
+
+                foreach ($files as $file) {
+                    if (file_exists($file) && filemtime($file) > $lastRun) {
+                        $changed = true;
+                        break;
+                    }
+                }
+
+                if ($changed) {
+                    $this->info('['.date('H:i:s').'] File changes detected. Regenerating...');
+                    try {
+                        $this->runGeneration($scanner, $config, $mapper, $writer);
+                    } catch (\Throwable $e) {
+                        $this->error('Generation failed: '.$e->getMessage());
+                    }
+                    $lastRun = time();
+                }
+
+                sleep(1);
+            }
+
+            return self::SUCCESS;
+        }
+
+        return $this->runGeneration($scanner, $config, $mapper, $writer);
+    }
+
+    protected function runGeneration(ClassScanner $scanner, array $config, CastTypeMapper $mapper, $writer): int
+    {
         $blocks = [];
 
         // 1. Enums
@@ -107,5 +149,28 @@ class GenerateCommand extends Command
         $this->info("\nWritten to: {$path}");
 
         return self::SUCCESS;
+    }
+
+    protected function getWatchFiles(array $config): array
+    {
+        $files = [];
+        $configPath = config_path('typegen.php');
+        if (file_exists($configPath)) {
+            $files[] = $configPath;
+        }
+
+        foreach ($config['paths'] ?? [] as $path) {
+            if ($path && is_dir($path)) {
+                $directoryIterator = new \RecursiveDirectoryIterator($path);
+                $iterator = new \RecursiveIteratorIterator($directoryIterator);
+                foreach ($iterator as $file) {
+                    if ($file->isFile() && $file->getExtension() === 'php') {
+                        $files[] = $file->getRealPath();
+                    }
+                }
+            }
+        }
+
+        return array_unique($files);
     }
 }

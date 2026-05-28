@@ -15,10 +15,17 @@ class CastTypeMapper
     public function toTypeScript(string $cast): string
     {
         // strip parameter portion: "decimal:2" -> "decimal"
-        $base = explode(':', $cast)[0];
+        $base = ltrim(explode(':', $cast)[0], '\\');
 
         if (isset($this->map[$base])) {
             return $this->map[$base];
+        }
+
+        // Also check if any key in map matches without backslash
+        foreach ($this->map as $key => $type) {
+            if (ltrim($key, '\\') === $base) {
+                return $type;
+            }
         }
 
         // class-string cast (enum or custom Cast class)

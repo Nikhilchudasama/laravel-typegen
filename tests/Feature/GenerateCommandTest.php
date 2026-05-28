@@ -118,3 +118,34 @@ it('handles cycles without infinite loop', function () {
 
     @unlink($outputPath);
 });
+
+it('splits output into separate files with imports when split config is enabled', function () {
+    config()->set('typegen.paths.enums', __DIR__.'/../Fixtures/Enums');
+    config()->set('typegen.paths.form_requests', __DIR__.'/../Fixtures/Requests');
+    config()->set('typegen.paths.models', __DIR__.'/../Fixtures/Models');
+    config()->set('typegen.output.split', true);
+
+    $outputPath = sys_get_temp_dir().'/split_out.ts';
+    config()->set('typegen.output.path', $outputPath);
+
+    $this->artisan('typescript:generate')->assertSuccessful();
+
+    $dir = sys_get_temp_dir().'/split_out';
+
+    expect(is_dir($dir))->toBeTrue()
+        ->and(file_exists("{$dir}/User.ts"))->toBeTrue()
+        ->and(file_exists("{$dir}/PostStatus.ts"))->toBeTrue()
+        ->and(file_exists("{$dir}/StorePostRequest.ts"))->toBeTrue()
+        ->and(file_exists("{$dir}/index.ts"))->toBeTrue();
+
+    // Verify imports inside User.ts
+    $userContents = file_get_contents("{$dir}/User.ts");
+    expect($userContents)->toContain("import { Post } from './Post';")
+        ->and($userContents)->toContain("import { PostStatus } from './PostStatus';");
+
+    // Clean up
+    foreach (glob("{$dir}/*.ts") as $file) {
+        @unlink($file);
+    }
+    @rmdir($dir);
+});

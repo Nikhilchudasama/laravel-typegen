@@ -3,6 +3,7 @@
 namespace hemilrajput\TypeGen;
 
 use hemilrajput\TypeGen\Commands\GenerateCommand;
+use hemilrajput\TypeGen\Commands\GenerateRoutesCommand;
 use Illuminate\Support\ServiceProvider;
 
 class TypeGenServiceProvider extends ServiceProvider
@@ -21,6 +22,7 @@ class TypeGenServiceProvider extends ServiceProvider
 
             $this->commands([
                 GenerateCommand::class,
+                GenerateRoutesCommand::class,
             ]);
         }
     }
