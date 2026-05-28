@@ -11,21 +11,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Database Schema Fallbacks**: Automated column type and nullability inference via database schema inspection (`Schema::getColumns()`), falling back gracefully to fillables.
 - **Eager-Loading TS Helpers**: Custom relationship wrapping using `Relation<T>` to help distinguish between unloaded, loaded, and null states in the frontend. Can be configured/disabled via `relations.wrap_with_relation`.
 
-## [1.1.0] - 2026-05-28
+## [1.1.0] - 2026-05-27
 
 ### Added
 - **Ignore Customization**: Supported excluding attributes and relations using `#[TypeScriptIgnore]` and the `ignore` array option on `#[TypeScript]`.
 - **Pluggable Type Mappers**: Container-bound singleton registry on `CastTypeMapper` to programmatically register custom type mappers at runtime.
 - **CLI Progress Bars**: Interactive terminal progress bar support for a cleaner generate command CLI experience.
 
-## [1.0.0] - 2026-05-28
+## [1.0.0] - 2026-05-25
 
 ### Added
 - **VitePress Documentation Site**: Built a fully-featured VitePress documentation site with comprehensive setup guides, Spatie migration comparison, and Inertia integrations.
 - **CI/CD Quality Gates**: Integrated GitHub Actions workflows running Pest testing matrix, Pint style checking, and PHPStan static analysis on every push/PR.
 - **Auto-Deployment Workflow**: Added GitHub Actions deployment for compiling and publishing VitePress docs to GitHub Pages.
 
-## [0.4.0] - 2026-05-28
+## [0.4.0] - 2026-05-22
 
 ### Added
 - **Route types generation**: New `typescript:routes` command to generate Ziggy-compatible typescript type mappings for named routes.
@@ -33,14 +33,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **File splitting**: Configurable file splitting (`output.split`) to generate individual files for each type with auto-resolved relative imports and barrel `index.ts`.
 - **Custom cast support**: Automatic mapping of custom Eloquent cast classes registered in config overrides.
 
-## [0.3.0] - 2026-05-15
+## [0.3.0] - 2026-05-19
 
 ### Added
 - Eloquent relationship support: opt in per-model via `#[TypeScript(includeRelations: [...])]`
 - Auto-discovery of related models — referenced models are generated automatically
 - Polymorphic `MorphTo` support via Laravel's morph map
 
-## [0.2.0] - 2026-05-15
+## [0.2.0] - 2026-05-16
 
 ### Added
 - **Enum Support**: `#[TypeScript]` on backed or pure enums generates TypeScript union types.
@@ -48,7 +48,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Enum-Cast Integration**: Models referencing enums via `$casts` produce typed references automatically.
 - **Professional Setup**: Added Laravel Pint and Larastan for code quality.
 
-## [0.1.0] - 2026-05-15
+## [0.1.0] - 2026-05-13
 
 ### Added
 - Initial release with Eloquent model generation.
