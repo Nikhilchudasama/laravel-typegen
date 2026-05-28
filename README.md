@@ -2,6 +2,9 @@
 
 > **Laravel TypeGen** — one artisan command turns your Eloquent models, Enums, and FormRequests into a single typed `.ts` file. No more hand-syncing PHP and TypeScript.
 
+## 📖 Documentation
+For complete documentation, guides, and setup instructions, visit [laravel-typegen.github.io](https://hemilrajput.github.io/laravel-typegen/).
+
 ## Why Laravel TypeGen?
 - **Keeps types in sync**: Automatically reflect changes in your PHP models in your TypeScript interfaces.
 Generate TypeScript types from Eloquent models, Enums, and FormRequests. Built for the Laravel 13 + Inertia + React/Vue stack.
@@ -128,9 +131,11 @@ Without a morph map, emits `unknown | null` with a comment.
 - [x] Enum support (v0.2)
 - [x] FormRequest → DTO (v0.2)
 - [x] Eloquent relationships (v0.3)
-- [ ] Route parameter types (v0.4)
-- [ ] Watch mode (v0.4)
-- [ ] Custom Cast class resolver (v0.4)
+- [x] Route parameter types (v0.4)
+- [x] Watch mode (v0.4)
+- [x] Custom Cast class resolver (v0.4)
+- [ ] VitePress documentation site (v1.0.0)
+- [ ] Stable release (v1.0.0)
 
 ## Configuration
 
