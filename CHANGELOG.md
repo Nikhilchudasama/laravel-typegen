@@ -15,8 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **TS Utility Package** (`@hemilrajput/laravel-typegen-helpers`): New npm package with `PaginatedResponse<T>`, `SimplePaginatedResponse<T>`, `InertiaForm<T>`, `ApiResource<T>`, `ApiResourceCollection<T>`, `Relation<T>`, and utility types (`DeepPartial`, `RequireFields`, `Unarray`, `EnumRecord`).
 
 ### Changed
-- CI test matrix now runs exclusively on PHP 8.3/8.4 × Laravel 12/13.
-- `orchestra/testbench` dev dependency narrowed to `^10.0`.
+- CI test matrix now runs on PHP 8.3/8.4 × Laravel 11/12/13.
+- `orchestra/testbench` dev dependency supports `^9.0|^10.0`.
 
 ---
 
