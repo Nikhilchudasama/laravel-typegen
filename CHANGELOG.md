@@ -5,16 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [3.0.0] - 2026-05-30
-
-### Breaking Changes
-- **PSR-4 Namespace Refactor**: The root namespace has been changed from `hemilrajput\TypeGen` to `Hemilrajput\TypeGen` to fully comply with PSR-4 standards and standard PHP conventions. You will need to update all imports (e.g., `use Hemilrajput\TypeGen\Attributes\TypeScript;`).
-
----
-
 ## [2.0.0] - 2026-05-30
 
 ### Breaking Changes
+- **PSR-4 Namespace Refactor**: The root namespace has been changed from `hemilrajput\TypeGen` to `Hemilrajput\TypeGen` to fully comply with PSR-4 standards and standard PHP conventions. You will need to update all imports (e.g., `use Hemilrajput\TypeGen\Attributes\TypeScript;`).
 - **Dropped PHP 8.2 support** — minimum requirement is now PHP 8.3.
 
 ### Added
@@ -31,7 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [1.3.0] - 2026-05-31
+## [1.3.0] - 2026-05-29
 
 ### Added
 - **Pre/Post Generation Hooks**: Added support for running shell commands before or after type generation (e.g. running Prettier or linters), replacing the `{file}` placeholder with the output file/directory.
