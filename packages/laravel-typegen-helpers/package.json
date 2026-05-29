@@ -1,0 +1,34 @@
+{
+    "name": "@hemilrajput/laravel-typegen-helpers",
+    "version": "1.0.0",
+    "description": "TypeScript utility types for Laravel TypeGen — PaginatedResponse, InertiaForm, ApiResource, and more.",
+    "main": "./dist/index.js",
+    "module": "./dist/index.mjs",
+    "types": "./dist/index.d.ts",
+    "exports": {
+        ".": {
+            "import": "./dist/index.mjs",
+            "require": "./dist/index.js",
+            "types": "./dist/index.d.ts"
+        }
+    },
+    "sideEffects": false,
+    "files": ["dist"],
+    "keywords": ["laravel", "typescript", "inertia", "eloquent", "types", "pagination"],
+    "license": "MIT",
+    "author": "Hemil Rajput <rajputhemil04@gmail.com>",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/hemilrajput/laravel-typegen",
+        "directory": "packages/laravel-typegen-helpers"
+    },
+    "scripts": {
+        "build": "tsup src/index.ts --format cjs,esm --dts --clean",
+        "dev": "tsup src/index.ts --format cjs,esm --dts --watch",
+        "typecheck": "tsc --noEmit"
+    },
+    "devDependencies": {
+        "tsup": "^8.0.0",
+        "typescript": "^5.3.0"
+    }
+}
