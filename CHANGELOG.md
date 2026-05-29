@@ -13,10 +13,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - **VS Code Extension** (`vscode-extension/`): Auto-runs `php artisan typescript:generate` when a PHP file containing `#[TypeScript]` is saved. Includes a status-bar toggle, manual trigger via Command Palette, and a streaming output channel.
 - **TS Utility Package** (`@hemilrajput/laravel-typegen-helpers`): New npm package with `PaginatedResponse<T>`, `SimplePaginatedResponse<T>`, `InertiaForm<T>`, `ApiResource<T>`, `ApiResourceCollection<T>`, `Relation<T>`, and utility types (`DeepPartial`, `RequireFields`, `Unarray`, `EnumRecord`).
+- **Module-Wise Architecture**: Enabling `split` mode now generates a beautifully organized module-wise directory structure (`Models/`, `Enums/`, `Requests/`) with automated relative imports, rather than flattening files into a single directory.
 
 ### Changed
 - CI test matrix now runs on PHP 8.3/8.4 × Laravel 11/12/13.
 - `orchestra/testbench` dev dependency supports `^9.0|^10.0`.
+
+### Fixed
+- **Un-typehinted Relationships**: Safely dynamically evaluates and resolves relationship types (using `Relation::noConstraints()`) for Eloquent models where developers omitted explicit PHP return types (e.g. `public function posts()`).
 
 ---
 

@@ -26,7 +26,7 @@ class RelationResolver
         try {
             /** @var Model $instance */
             $instance = new $modelClass;
-            /** @var Relation $relation */
+            /** @var mixed $relation */
             $relation = Relation::noConstraints(fn () => $instance->{$methodName}());
         } catch (Throwable $e) {
             return [
