@@ -312,3 +312,57 @@ it('generates TypeScript types for API Resources from PHPDoc and Model fallback'
 
     @unlink($outputPath);
 });
+
+it('generates valid typescript that compiles', function () {
+    $outputPath = sys_get_temp_dir().'/compile_test.ts';
+
+    config()->set('typegen.paths.models', __DIR__.'/../Fixtures/Models');
+    config()->set('typegen.paths.enums', __DIR__.'/../Fixtures/Enums');
+    config()->set('typegen.paths.form_requests', __DIR__.'/../Fixtures/Requests');
+    config()->set('typegen.output.path', $outputPath);
+
+    // Drop and recreate tables so DB inference works and we don't throw exception
+    Schema::dropIfExists('users');
+    Schema::create('users', function ($table) {
+        $table->id();
+        $table->string('name');
+        $table->string('email')->nullable();
+        $table->string('role')->nullable();
+        $table->string('password');
+        $table->string('remember_token')->nullable();
+        $table->timestamp('email_verified_at')->nullable();
+        $table->boolean('is_admin')->default(false);
+        $table->json('preferences')->nullable();
+        $table->string('status')->nullable();
+        $table->timestamps();
+    });
+
+    Schema::dropIfExists('posts');
+    Schema::create('posts', function ($table) {
+        $table->id();
+        $table->foreignId('user_id');
+        $table->string('title');
+        $table->text('body');
+        $table->timestamps();
+    });
+
+    Schema::dropIfExists('profiles');
+    Schema::create('profiles', function ($table) {
+        $table->id();
+        $table->foreignId('user_id');
+        $table->string('bio')->nullable();
+        $table->timestamps();
+    });
+
+    $this->artisan('typescript:generate')->assertSuccessful();
+
+    // Now run tsc --noEmit
+    $process = \Symfony\Component\Process\Process::fromShellCommandline("npx tsc --noEmit --strict {$outputPath}");
+    $process->run();
+
+    expect($process->isSuccessful())->toBeTrue(
+        "TypeScript compilation failed:\n" . $process->getErrorOutput() . "\n" . $process->getOutput()
+    );
+
+    @unlink($outputPath);
+})->skip(fn() => !trim(shell_exec('which npx')), 'npx is not installed');
