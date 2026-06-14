@@ -358,7 +358,7 @@ it('generates valid typescript that compiles', function () {
     $this->artisan('typescript:generate')->assertSuccessful();
 
     // Now run tsc --noEmit
-    $process = Process::fromShellCommandline("npx tsc --noEmit --strict {$outputPath}");
+    $process = Process::fromShellCommandline("npx -p typescript tsc --noEmit --strict {$outputPath}");
     $process->run();
 
     expect($process->isSuccessful())->toBeTrue(
