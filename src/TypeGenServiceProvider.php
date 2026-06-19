@@ -13,7 +13,7 @@ class TypeGenServiceProvider extends ServiceProvider
     {
         $this->mergeConfigFrom(__DIR__.'/../config/typegen.php', 'typegen');
 
-        $this->app->singleton(fn ($app): CastTypeMapper => new CastTypeMapper(config('typegen.cast_map', [])));
+        $this->app->singleton(CastTypeMapper::class, fn ($app): CastTypeMapper => new CastTypeMapper(config('typegen.cast_map', [])));
     }
 
     public function boot(): void

@@ -14,18 +14,18 @@ use Hemilrajput\TypeGen\Relations\RelationResolver;
 use Hemilrajput\TypeGen\Scanners\ClassScanner;
 use Hemilrajput\TypeGen\Writers\TypeScriptSplitWriter;
 use Hemilrajput\TypeGen\Writers\TypeScriptWriter;
-use Illuminate\Console\Attributes\Description;
-use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 use Illuminate\Support\Sleep;
 use Symfony\Component\Process\Process;
 
-#[Description('Generate TypeScript types from Laravel models, enums, and form requests.')]
-#[Signature('typescript:generate
-                            {--dry-run : Print output instead of writing}
-                            {--watch : Keep running and watch for file changes}')]
 class GenerateCommand extends Command
 {
+    protected $signature = 'typescript:generate
+                            {--dry-run : Print output instead of writing}
+                            {--watch : Keep running and watch for file changes}';
+
+    protected $description = 'Generate TypeScript types from Laravel models, enums, and form requests.';
+
     public function handle(ClassScanner $classScanner, CastTypeMapper $castTypeMapper): int
     {
         $config = config('typegen');
