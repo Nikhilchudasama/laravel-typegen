@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.1] - 2026-06-20
+
+### Fixed
+- Fixed Rector configuration to maintain Laravel 11 compatibility by limiting Laravel sets to `UP_TO_LARAVEL_110`.
+- Aligned VS Code extension version to match main package release version.
+
+### Added
+- Integrated Rector validation checks into GitHub Actions CI pipeline.
+- Documented comprehensive pre-commit/pre-push validation commands in contributing guidelines.
+
+---
+
 ## [2.1.0] - 2026-06-14
 
 ### Changed
@@ -101,6 +113,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `#[TypeScript]` attribute for opting into generation.
 - Artisan `typescript:generate` command.
 
+[2.1.1]: https://github.com/hemilrajput/laravel-typegen/compare/v2.1.0...v2.1.1
 [2.1.0]: https://github.com/hemilrajput/laravel-typegen/compare/v2.0.2...v2.1.0
 [2.0.2]: https://github.com/hemilrajput/laravel-typegen/compare/v2.0.1...v2.0.2
 [2.0.1]: https://github.com/hemilrajput/laravel-typegen/compare/v2.0.0...v2.0.1
