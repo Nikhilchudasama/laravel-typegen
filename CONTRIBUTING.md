@@ -18,15 +18,21 @@ Please be respectful and professional in all interactions.
 1. Fork the repo and create your branch from `main`.
 2. If you've added code that should be tested, add tests.
 3. If you've changed APIs, update the documentation.
-4. Ensure the test suite passes (`vendor/bin/pest`).
-5. Make sure your code follows the PSR-12 coding standard.
+4. Run all validation checks to ensure code quality:
+   - **Code Style (Pint)**: `composer lint` (or `composer lint:test` for dry-run)
+   - **Static Analysis (PHPStan)**: `composer stan`
+   - **Rector Check**: `composer rector` (or `composer rector:fix` to auto-fix)
+   - **Test Suite**: `composer test`
 
 ## Local Development
 ```bash
 git clone git@github.com:hemilrajput/laravel-typegen.git
 cd laravel-typegen
 composer install
-vendor/bin/pest
+composer lint
+composer stan
+composer rector
+composer test
 ```
 
 Happy coding!

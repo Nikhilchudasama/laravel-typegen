@@ -26,7 +26,7 @@ return RectorConfig::configure()
         privatization: true,
     )
     ->withSets([
-        LaravelLevelSetList::UP_TO_LARAVEL_130,
+        LaravelLevelSetList::UP_TO_LARAVEL_110,
         LaravelSetList::LARAVEL_CODE_QUALITY,
         LaravelSetList::LARAVEL_COLLECTION,
     ]);
